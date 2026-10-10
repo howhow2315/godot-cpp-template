@@ -4,7 +4,7 @@ This repository serves as a quickstart template for GDExtension development with
 ## Contents
 * Preconfigured source files for C++ development of the GDExtension ([src/](./src/))
 * An empty Godot project in [project/](./project), to test the GDExtension
-* godot-cpp as a submodule (`godot-cpp/`)
+* godot-cpp as a submodule (`library/godot-cpp/`)
 * GitHub Issues template ([.github/ISSUE_TEMPLATE.yml](./.github/ISSUE_TEMPLATE.yml))
 * GitHub CI/CD workflows to publish your library packages when creating a release ([.github/workflows/builds.yml](./.github/workflows/builds.yml))
 * An SConstruct file with various functions, such as boilerplate for [Adding documentation](https://docs.godotengine.org/en/stable/tutorials/scripting/cpp/gdextension_docs_system.html)
@@ -18,7 +18,7 @@ To get started with your new GDExtension, do the following:
 * clone your repository to your local computer
 * initialize the godot-cpp git submodule via `git submodule update --init`
 * change the name of the compiled library file inside the [SConstruct](./SConstruct) file by modifying the `libname` string.
-  * change the paths of the to be loaded library name inside the [project/bin/example.gdextension](./project/bin/example.gdextension) file, by replacing `EXTENSION-NAME` with the name you chose for `libname`.
+  * change the paths of the to be loaded library name inside the [project/bin/example.gdextension](./project/bin/example.gdextension) file, by replacing `example` with the name you chose for `libname`.
 * change the `entry_symbol` string inside [project/bin/example.gdextension](./project/bin/example.gdextension) file.
   * rename the `example_library_init` function in [src/register_types.cpp](./src/register_types.cpp) to the same name you chose for `entry_symbol`.
 * change the name of the `project/bin/example.gdextension` file
@@ -45,6 +45,8 @@ scons compiledb=yes
 # Generate compile_commands.json without compiling
 scons compiledb=yes compile_commands.json
 ```
+
+A helper [script](./scripts/build.sh) is attached to assist in prototyping, this ensures compile_commands.json, clears out .godot, removes existing bins, and then compiles 
 
 ## Usage - Actions
 

@@ -16,7 +16,7 @@ custom.py
 compile_commands.json
 
 # Ignore files generated for documentation
-/src/gen
+/generated
 
 # Binaries
 *.o
@@ -35,6 +35,12 @@ compile_commands.json
 *.includes
 *.idb
 *.exp
+
+# Python
+__pycache__
+
+# clangd
+.cache
 
 # Other stuff
 *.log
