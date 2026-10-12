@@ -1,7 +1,9 @@
 # godot-cpp template
+
 This repository serves as a quickstart template for GDExtension development with Godot 4.0+.
 
 ## Contents
+
 * Preconfigured source files for C++ development of the GDExtension ([src/](./src/))
 * An empty Godot project in [project/](./project), to test the GDExtension
 * godot-cpp as a submodule (`library/godot-cpp/`)
@@ -36,8 +38,10 @@ Type: 24
 ```
 
 ### Configuring an IDE
+
 You can develop your own extension with any text editor and by invoking scons on the command line, but if you want to work with an IDE (Integrated Development Environment), you can use a compilation database file called `compile_commands.json`. Most IDEs should automatically identify this file, and self-configure appropriately.
 To generate the database file, you can run one of the following commands in the project root directory:
+
 ```shell
 # Generate compile_commands.json while compiling
 scons compiledb=yes
@@ -46,7 +50,7 @@ scons compiledb=yes
 scons compiledb=yes compile_commands.json
 ```
 
-A helper [script](./scripts/build.sh) is attached to assist in prototyping, this ensures compile_commands.json, clears out .godot, removes existing bins, and then compiles 
+A helper [script](./scripts/build.sh) is attached to assist in prototyping, this ensures compile_commands.json, clears out .godot, removes existing bins, and then compiles
 
 ## Usage - Actions
 

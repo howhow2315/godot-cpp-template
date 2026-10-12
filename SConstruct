@@ -4,6 +4,7 @@ from methods import print_error
 
 
 libname = "example"
+ADDON_NAME = f"godot-{libname}"
 API_VERSION = "4.7"
 
 # Build profiles can be used to decrease compile times.
@@ -16,12 +17,13 @@ USE_BUILD_PROFILE = True
 
 PROJECT_DIRECTORY = "project"
 
+ADDON_DIRECTORY = f"{PROJECT_DIRECTORY}/addons/{ADDON_NAME}"
+BINARY_DIRECTORY = f"{ADDON_DIRECTORY}/binaries"
 LIBRARY_DIRECTORY = "library"
 SOURCE_DIRECTORY = "source"
 GENERATED_DIRECTORY = f"generated"
-GENERATED_DOCUMENTS_DIRECTORY = f"generated/documents"
-ADDON_DIRECTORY = f"{PROJECT_DIRECTORY}/addons/{libname}"
-BIN_DIRECTORY = f"{ADDON_DIRECTORY}/bin"
+GENERATED_DOCUMENTS_DIRECTORY = f"{GENERATED_DIRECTORY}/documents"
+LIBRARY_INSTALL = f"{GENERATED_DIRECTORY}/{LIBRARY_DIRECTORY}"
 
 
 localEnv = Environment(tools=["default"], PLATFORM="")
@@ -63,14 +65,15 @@ if env["target"] in ["editor", "template_debug"]:
 suffix = env['suffix'].replace(".dev", "").replace(".universal", "")
 lib_filename = f"{env.subst('$SHLIBPREFIX')}{libname}{suffix}{env.subst('$SHLIBSUFFIX')}"
 
+BIN_SUBDIRECTORY = env["platform"]
+# BIN_SUBDIRECTORY = f"{env["platform"]}.{env['arch']}" # if you use this make sure to update the .gdextension
+
 library = env.SharedLibrary(
-    f"bin/{env['platform']}/{lib_filename}",
+    f"{LIBRARY_INSTALL}/{BIN_SUBDIRECTORY}/{lib_filename}",
     source=sources,
 )
 
-BIN_SUBDIRECTORY = env["platform"]
-# BIN_SUBDIRECTORY = f"{env["platform"]}.{env['arch']}" # if you use this make sure to update the .gdextension
-copy = env.Install(f"{ADDON_DIRECTORY}/bin/{BIN_SUBDIRECTORY}/", library)
+copy = env.Install(f"{BINARY_DIRECTORY}/{BIN_SUBDIRECTORY}/", library)
 
 default_args = [library, copy]
 Default(*default_args)

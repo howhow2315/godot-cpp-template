@@ -4,6 +4,16 @@
 name: Make a GDExtension build for all supported platforms
 on:
   workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag (e.g. v1.0.0)"
+        required: true
+        type: string
+
+env:
+  ADDON_NAME: godot-example
+  ADDON_DIR: project/addons
+  BIN_DIR: binaries
 
 jobs:
   build:
@@ -30,7 +40,10 @@ jobs:
             { platform: ios, arch: arm64, os: macos-latest },
             { platform: web, arch: wasm32, os: ubuntu-22.04 },
           ]
-        target-type: [template_debug, template_release]
+        target-type: [
+          template_debug, 
+          template_release
+          ]
         float-precision: [single]
 
     runs-on: ${{ matrix.target.os }}
@@ -49,7 +62,7 @@ jobs:
 
       # Setup dependencies
       - name: Setup godot-cpp
-        uses: ./godot-cpp/.github/actions/setup-godot-cpp
+        uses: ./library/godot-cpp/.github/actions/setup-godot-cpp
         with:
           platform: ${{ matrix.target.platform }}
           em-version: 3.1.62
@@ -57,7 +70,7 @@ jobs:
       # Build GDExtension (with caches)
 
       - name: Restore .scons_cache
-        uses: ./godot-cpp/.github/actions/godot-cache-restore
+        uses: ./library/godot-cpp/.github/actions/godot-cache-restore
         with:
           scons-cache: ${{ github.workspace }}/.scons-cache/
           cache-name: ${{ matrix.target.platform }}_${{ matrix.target.arch }}_${{ matrix.float-precision }}_${{ matrix.target-type }}
@@ -70,7 +83,7 @@ jobs:
           scons target=${{ matrix.target-type }} platform=${{ matrix.target.platform }} arch=${{ matrix.target.arch }} precision=${{ matrix.float-precision }}
 
       - name: Save .scons_cache
-        uses: ./godot-cpp/.github/actions/godot-cache-save
+        uses: ./library/godot-cpp/.github/actions/godot-cache-save
         with:
           scons-cache: ${{ github.workspace }}/.scons-cache/
           cache-name: ${{ matrix.target.platform }}_${{ matrix.target.arch }}_${{ matrix.float-precision }}_${{ matrix.target-type }}
@@ -80,15 +93,14 @@ jobs:
         if: ${{ matrix.target.platform == 'windows' }}
         shell: pwsh
         run: |
-          Remove-Item bin/* -Include *.exp,*.lib,*.pdb -Force
+          Remove-Item "${{ env.ADDON_DIR }}/${{ env.ADDON_NAME }}/${{ env.BIN_DIR }}/*" -Include *.exp,*.lib,*.pdb -Force
 
-      # Upload the build
+      # Upload the entire addon folder
       - name: Upload Artifact
         uses: actions/upload-artifact@v7
         with:
-          name: godot-cpp-template-${{ matrix.target.platform }}-${{ matrix.target.arch }}-${{ matrix.float-precision }}-${{ matrix.target-type }}
-          path: |
-            ${{ github.workspace }}/bin/**
+          name: ${{ env.ADDON_NAME }}-${{ matrix.target.platform }}-${{ matrix.target.arch }}-${{ matrix.float-precision }}-${{ matrix.target-type }}
+          path: ${{ env.ADDON_DIR }}/${{ env.ADDON_NAME }}/
 
   # Merges all the build artifacts together into a single godot-cpp-template artifact.
   # If you comment out this step, all the builds will be uploaded individually.
@@ -99,6 +111,33 @@ jobs:
       - name: Merge Artifacts
         uses: actions/upload-artifact/merge@v7
         with:
-          name: godot-cpp-template
-          pattern: godot-cpp-template-*
+          name: ${{ env.ADDON_NAME }}
+          pattern: ${{ env.ADDON_NAME }}-*
           delete-merged: true
+
+  release:
+    runs-on: ubuntu-22.04
+    needs: merge
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download merged addon artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.ADDON_NAME }}
+          path: dist/
+
+      - name: Package addon as ZIP
+        working-directory: dist
+        run: |
+          zip -r "$GITHUB_WORKSPACE/${{ env.ADDON_NAME }}.zip" .
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ inputs.tag }}
+          target_commitish: ${{ github.sha }}
+          name: ${{ inputs.tag }}
+          generate_release_notes: true
+          files: ${{ env.ADDON_NAME }}.zip
