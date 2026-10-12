@@ -17,8 +17,12 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 config/name="godot-cpp-template"
 run/main_scene="uid://dh0oj81pufivs"
 config/features=PackedStringArray("4.7", "Forward Plus")
-config/icon="res://icon.svg"
+config/icon="uid://dbx66sovxd1"
 
 [godots]
 
 version_hint=""
+
+[rendering]
+
+textures/vram_compression/import_etc2_astc=true
